@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title> Mach cone </title>
+    <script type="text/javascript" src="http://mbostock.github.com/d3/d3.js"></script>
+</head>
+<body>
+
+	<script>
+
+		var width = 1000;
+		var height = 1000;
+		var xpos = 600, ypos = 200;
+		var textwidth = 100, textheight = 50;
+						
+		var time = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5];
+		var time = time.map(function(x) {return 1.e3*x ;} );
+		var bubble_time = 8000, vsound = 0.1;		
+		var max_radius = bubble_time * vsound;
+		var Mach = 0.5;
+		var vsource = Mach * vsound;
+		var xsource = time.map(function(x) {return x * vsource;} );
+		
+//		console.log(xsource);
+		
+//		var widthScale = d3.scale.linear()
+//							.domain([0,100])
+//							.range([0, width]);
+							
+//		var color = d3.scale.linear()
+//							.domain([0,100])
+//							.range(["red","blue"]);
+							
+//		var axis = d3.svg.axis()
+//					.ticks(5)
+//					.scale(widthScale);
+							
+		var canvas = d3.select("body")
+					 .append("svg")
+					 .attr("width",width)
+					 .attr("height",height)
+					 .append("g")
+					 .attr("transform","translate(20,0)");
+					 
+		var elementRoot = canvas.selectAll("g").data(xsource).enter().append("g");			 
+					 
+		var circles = elementRoot.append("circle")							
+							.attr("cx", function(d) { return d; } )
+							.attr("cy", ypos)
+							.attr("r", 0)
+							.attr("fill","none")
+							.attr("stroke","black")
+							.transition()
+								.delay( function(d,i) { return time[i]; } )
+								.duration( bubble_time )
+								.attr("r", max_radius )
+								.remove()
+								//.ease("elastic",10,0.5)//Math.sqrt)	
+		
+		var source = elementRoot.append("circle")
+							.attr("cx", function(d) { return d; } )
+							.attr("cy", 100)
+							.attr("r", 0)
+							.attr("fill","black")
+							//.attr("stroke","black")	
+							.transition()
+								.delay( function(d,i) { return time[i]; } )
+								.duration( 50 )
+								.attr("r",2)
+								.remove()
+											
+		var rect = canvas.append("rect")
+					.attr("width", textwidth)
+					.attr("height",textheight)
+					.attr("x",xpos).attr("y",ypos-textheight/2)
+					.attr("fill","steelblue")
+					.append("text","Mach 0.5")
+					
+		var rect = canvas.append("text").text("Mach =  0.5")
+					.attr("x",xpos+10).attr("y",ypos+5)
+					.attr("fill","black")
+
+
+							
+		//circles.transition()
+		//	.duration(1000)
+		//	.attr("r",10)
+			
+							
+		//canvas.append("g")
+		//	.attr("transform","translate(0,400)")	
+		//	.call(axis);				
+					 	
+    </script>
+</body>
+</html>   
