@@ -1,39 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title> Mach cone </title>
+	<title> Mach Cone </title>
     <script type="text/javascript" src="http://mbostock.github.com/d3/d3.js"></script>
 </head>
 <body>
 
 	<script>
 
+		function range(start, end){
+		  var ra = [];
+		  var i_final = Math.round(end / 0.5);
+		  ra[0] = 0.0;
+		  for(var i=1; i<i_final; i++){
+			ra[i] = ra[i-1] + 0.5;
+		  }
+		  console.log(ra)
+		  return ra;
+		}
+
 		var width = 1000;
 		var height = 1000;
 		var xpos = 600, ypos = 200;
-		var textwidth = 100, textheight = 50;
+		var textwidth = 150, textheight = 50;
+		var sourcerd = 5;
 						
-		var time = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5];
-		var time = time.map(function(x) {return 1.e3*x ;} );
-		var bubble_time = 8000, vsound = 0.1;		
+		//var time = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0];
+		var bubble_time = 4000, vsound = 0.05;		
 		var max_radius = bubble_time * vsound;
-		var Mach = 0.5;
-		var vsource = Mach * vsound;
+		var Mach_sub = 0.5, Mach_sup = 2.0;
+		var Mach_mult = Mach_sup / Mach_sub;
+		var vsource = Mach_sub * vsound;
+		
+		
+		var time = range(0.,15.);  //creates evenly spaced array
+		var time = time.map(function(x) {return 1.e3*x ;} );
 		var xsource = time.map(function(x) {return x * vsource;} );
-		
-//		console.log(xsource);
-		
-//		var widthScale = d3.scale.linear()
-//							.domain([0,100])
-//							.range([0, width]);
-							
-//		var color = d3.scale.linear()
-//							.domain([0,100])
-//							.range(["red","blue"]);
-							
-//		var axis = d3.svg.axis()
-//					.ticks(5)
-//					.scale(widthScale);
+
 							
 		var canvas = d3.select("body")
 					 .append("svg")
@@ -44,7 +47,7 @@
 					 
 		var elementRoot = canvas.selectAll("g").data(xsource).enter().append("g");			 
 					 
-		var circles = elementRoot.append("circle")							
+		var circles_sub = elementRoot.append("circle")							
 							.attr("cx", function(d) { return d; } )
 							.attr("cy", ypos)
 							.attr("r", 0)
@@ -55,41 +58,66 @@
 								.duration( bubble_time )
 								.attr("r", max_radius )
 								.remove()
-								//.ease("elastic",10,0.5)//Math.sqrt)	
+								.ease("linear")
 		
-		var source = elementRoot.append("circle")
+		var source_sub = elementRoot.append("circle")
 							.attr("cx", function(d) { return d; } )
-							.attr("cy", 100)
+							.attr("cy", ypos)
 							.attr("r", 0)
 							.attr("fill","black")
 							//.attr("stroke","black")	
 							.transition()
 								.delay( function(d,i) { return time[i]; } )
 								.duration( 50 )
-								.attr("r",2)
+								.attr("r",sourcerd)
 								.remove()
+
+										
+		var circles_sup = elementRoot.append("circle")							
+							.attr("cx", function(d) { return d; } )
+							.attr("cy", 2 * ypos)
+							.attr("r", 0)
+							.attr("fill","none")
+							.attr("stroke","black")
+							.transition()
+								.delay( function(d,i) { return time[i] / Mach_mult; } )
+								.duration( bubble_time )
+								.attr("r", max_radius )
+								.remove()
+								.ease("linear")
+		
+		var source_sup = elementRoot.append("circle")
+							.attr("cx", function(d) { return d; } )
+							.attr("cy", 2 * ypos)
+							.attr("r", 0)
+							.attr("fill","black")
+							//.attr("stroke","black")	
+							.transition()
+								.delay( function(d,i) { return time[i] / Mach_mult; } )
+								.duration( 50 )
+								.attr("r",sourcerd)
+								.remove()
+
 											
-		var rect = canvas.append("rect")
+		canvas.append("rect")
 					.attr("width", textwidth)
 					.attr("height",textheight)
 					.attr("x",xpos).attr("y",ypos-textheight/2)
 					.attr("fill","steelblue")
-					.append("text","Mach 0.5")
+		canvas.append("rect")
+					.attr("width", textwidth)
+					.attr("height",textheight)
+					.attr("x",xpos).attr("y",2 * ypos-textheight/2)
+					.attr("fill","steelblue")
 					
-		var rect = canvas.append("text").text("Mach =  0.5")
-					.attr("x",xpos+10).attr("y",ypos+5)
+		
+		canvas.append("text").text("SUBSONIC")
+					.attr("x",xpos+20).attr("y",ypos+5)
 					.attr("fill","black")
-
-
-							
-		//circles.transition()
-		//	.duration(1000)
-		//	.attr("r",10)
-			
-							
-		//canvas.append("g")
-		//	.attr("transform","translate(0,400)")	
-		//	.call(axis);				
+		canvas.append("text").text("SUPERSONIC")
+					.attr("x",xpos+20).attr("y",2 * ypos+5)
+					.attr("fill","black")
+					
 					 	
     </script>
 </body>
